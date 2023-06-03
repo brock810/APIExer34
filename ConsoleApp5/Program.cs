@@ -1,12 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 class Program
 {
     static async System.Threading.Tasks.Task Main(string[] args)
     {
-        string apiKey = "80fada63f67ededd921d41d8604b8685";
+        string appSettingsPath = "appsettings.json";
+        string json = File.ReadAllText(appSettingsPath);
+        JObject appSettings = JObject.Parse(json);
+        string apiKey = appSettings.GetValue("apiKey").ToString();
 
         Console.Write("Enter a city: ");
         string city = Console.ReadLine();
@@ -20,8 +24,8 @@ class Program
                 HttpResponseMessage response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
 
-                string json = await response.Content.ReadAsStringAsync();
-                dynamic weatherData = JsonConvert.DeserializeObject(json);
+                string weatherJson = await response.Content.ReadAsStringAsync();
+                dynamic weatherData = JObject.Parse(weatherJson);
 
                 string cityName = weatherData.name;
                 double temperature = weatherData.main.temp;
